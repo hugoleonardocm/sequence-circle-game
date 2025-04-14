@@ -166,6 +166,54 @@
             font-size: 18px;
             padding: 10px 20px;
         }
+        
+        /* Estilo para o overlay de sucesso */
+        .success-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            font-size: 32px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .success-overlay .title {
+            color: gold;
+            font-size: 40px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .success-overlay .message {
+            color: #8fe88f;
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        
+        .success-overlay button {
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #2a6e2d;
+        }
+        
+        .success-overlay button:hover {
+            background-color: #3a8e3d;
+        }
     </style>
 </head>
 <body>
@@ -199,35 +247,35 @@
                 circleCount: 10,
                 spawnDelay: 1000,
                 timeToClick: 2000,
-                circleSize: 60,
+                circleSize: 80,
                 hitZoneTolerance: 0.30
             },
             medium: {
                 circleCount: 15,
                 spawnDelay: 750,
                 timeToClick: 1500,
-                circleSize: 60,
+                circleSize: 80,
                 hitZoneTolerance: 0.25
             },
             hard: {
                 circleCount: 20,
                 spawnDelay: 600,
                 timeToClick: 1200,
-                circleSize: 60,
+                circleSize: 80,
                 hitZoneTolerance: 0.20
             },
             expert: {
                 circleCount: 25,
                 spawnDelay: 500,
                 timeToClick: 1000,
-                circleSize: 60,
+                circleSize: 80,
                 hitZoneTolerance: 0.15
             },
             insane: {
                 circleCount: 30,
                 spawnDelay: 300,
                 timeToClick: 600,
-                circleSize: 60,
+                circleSize: 80,
                 hitZoneTolerance: 0.10
             }
         };
@@ -337,6 +385,37 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
                 setTimeout(() => oscillator.stop(), 400);
             }, 200);
+        }
+        
+        // Som de celebração para conclusão de nível
+        function createCelebrationSound() {
+            if (!audioContext) return;
+            
+            // Primeiro acorde
+            const playChord = (baseFreq, time, duration) => {
+                const notes = [1, 1.25, 1.5]; // Intervalos para formar um acorde maior
+                
+                notes.forEach(interval => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.value = baseFreq * interval;
+                    gain.gain.value = 0.15; // Volume mais baixo para cada nota do acorde
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(audioContext.currentTime + time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + time + duration);
+                    osc.stop(audioContext.currentTime + time + duration);
+                });
+            };
+            
+            // Tocar uma sequência de acordes rápidos ascendentes
+            playChord(440, 0, 0.3);    // Lá
+            playChord(523.25, 0.25, 0.3); // Dó
+            playChord(659.25, 0.5, 0.6);  // Mi (mais longo)
         }
         
         // Iniciar o jogo
@@ -697,7 +776,30 @@
             startButton.disabled = false;
             
             if (success) {
-                alert(`Parabéns! Você completou o nível ${levelSelect.options[levelSelect.selectedIndex].text} com ${score} pontos!`);
+                // Substituir o alert por um overlay de sucesso
+                const successOverlay = document.createElement('div');
+                successOverlay.className = 'success-overlay';
+                
+                // Pegar o nome do nível atual
+                const levelName = levelSelect.options[levelSelect.selectedIndex].text;
+                
+                successOverlay.innerHTML = `
+                    <div class="title">PARABÉNS!</div>
+                    <div class="message">Você completou o nível ${levelName}</div>
+                    <div class="message">com ${score} pontos!</div>
+                    <button id="continue-button">Continuar</button>
+                `;
+                
+                gameContainer.appendChild(successOverlay);
+                
+                // Tocar som de celebração
+                createCelebrationSound();
+                
+                // Configurar botão de continuar
+                document.getElementById('continue-button').addEventListener('click', () => {
+                    successOverlay.remove();
+                    resetGame();
+                });
             }
         }
         
