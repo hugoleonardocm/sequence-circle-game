@@ -314,27 +314,28 @@
             }, 200);
         }
         
+        // Som de falha mais suave
         function createFailSound() {
             if (!audioContext) return;
             
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.value = 400;
-            gainNode.gain.value = 0.3;
+            oscillator.type = 'sine'; // Mudado de 'sawtooth' para 'sine' para um som mais suave
+            oscillator.frequency.value = 300; // Frequência mais baixa para som menos irritante
+            gainNode.gain.value = 0.2; // Volume reduzido
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
             oscillator.start();
             
-            // Modulação de frequência para som de falha
-            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
+            // Modulação de frequência mais suave
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
             
             setTimeout(() => {
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-                setTimeout(() => oscillator.stop(), 300);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+                setTimeout(() => oscillator.stop(), 400);
             }, 200);
         }
         
@@ -686,9 +687,8 @@
                 resetGame();
             });
             
-            // Som de falha mais dramático
+            // Som de falha mais suave (apenas um som)
             createFailSound();
-            setTimeout(createFailSound, 300);
         }
         
         // Finalizar o jogo com sucesso
