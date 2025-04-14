@@ -770,11 +770,11 @@
                 <button id="restart-button">Tentar Novamente</button>
             `;
             gameContainer.appendChild(gameOverOverlay);
+            startButton.disabled = false;
             
             // Configurar botão de reinício
             document.getElementById('restart-button').addEventListener('click', () => {
                 gameOverOverlay.remove();
-                startButton.disabled = false;
                 resetGame();
             });
             
