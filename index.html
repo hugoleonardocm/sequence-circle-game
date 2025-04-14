@@ -324,7 +324,7 @@
             
             // Usar um som mais suave, com frequência mais alta e volume mais baixo
             oscillator.type = 'sine'; // Onda senoidal é mais suave que outras ondas
-            oscillator.frequency.value = 120; // Frequência mais aguda, menos "batida"
+            oscillator.frequency.value = 180; // Frequência mais aguda, menos "batida"
             gainNode.gain.value = 0.15; // Volume bem reduzido
             
             oscillator.connect(gainNode);
@@ -355,9 +355,6 @@
             gainNode.connect(audioContext.destination);
             
             oscillator.start();
-            
-            // Modulação de frequência mais suave
-            oscillator.frequency.linearRampToValueAtTime(1320, audioContext.currentTime + 0.1); // Rampa linear em vez de exponencial
             
             // Envelope de amplitude mais suave
             gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
