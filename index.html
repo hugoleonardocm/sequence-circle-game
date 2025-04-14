@@ -247,35 +247,35 @@
                 circleCount: 10,
                 spawnDelay: 1000,
                 timeToClick: 2000,
-                circleSize: 80,
+                circleSize: 60,
                 hitZoneTolerance: 0.30
             },
             medium: {
                 circleCount: 15,
                 spawnDelay: 750,
                 timeToClick: 1500,
-                circleSize: 80,
+                circleSize: 60,
                 hitZoneTolerance: 0.25
             },
             hard: {
                 circleCount: 20,
                 spawnDelay: 600,
                 timeToClick: 1200,
-                circleSize: 80,
+                circleSize: 60,
                 hitZoneTolerance: 0.20
             },
             expert: {
                 circleCount: 25,
                 spawnDelay: 500,
                 timeToClick: 1000,
-                circleSize: 80,
+                circleSize: 60,
                 hitZoneTolerance: 0.15
             },
             insane: {
                 circleCount: 30,
                 spawnDelay: 300,
                 timeToClick: 600,
-                circleSize: 80,
+                circleSize: 60,
                 hitZoneTolerance: 0.10
             }
         };
@@ -315,29 +315,32 @@
             source.start(0);
         }
         
-        // Criar som de batida de porta (toc toc)
+        // Criar som de batida de porta (toc toc) - SUAVIZADO
         function createKnockSound() {
             if (!audioContext) return;
             
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
-            oscillator.type = 'sine';
-            oscillator.frequency.value = 150; // Frequência mais baixa para imitar batida
-            gainNode.gain.value = 0.5;
+            // Usar um som mais suave, com frequência mais alta e volume mais baixo
+            oscillator.type = 'sine'; // Onda senoidal é mais suave que outras ondas
+            oscillator.frequency.value = 220; // Frequência mais aguda, menos "batida"
+            gainNode.gain.value = 0.15; // Volume bem reduzido
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
             oscillator.start();
             
-            // Tocar som curto e mais ressonante
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+            // Envelope de amplitude mais suave, sem ataque pronunciado
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02); // Rampa gradual para subir
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1); // Decaimento mais rápido
             
-            setTimeout(() => oscillator.stop(), 150);
+            setTimeout(() => oscillator.stop(), 100); // Som mais curto
         }
         
+        // Som de sucesso suavizado
         function createSuccessSound() {
             if (!audioContext) return;
             
@@ -345,21 +348,23 @@
             const gainNode = audioContext.createGain();
             
             oscillator.type = 'sine';
-            oscillator.frequency.value = 1200;
-            gainNode.gain.value = 0.3;
+            oscillator.frequency.value = 880; // Frequência mais agradável (Lá)
+            gainNode.gain.value = 0.15; // Volume reduzido
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
             oscillator.start();
             
-            // Modulação de frequência para som de sucesso
-            oscillator.frequency.exponentialRampToValueAtTime(1800, audioContext.currentTime + 0.1);
+            // Modulação de frequência mais suave
+            oscillator.frequency.linearRampToValueAtTime(1320, audioContext.currentTime + 0.1); // Rampa linear em vez de exponencial
             
-            setTimeout(() => {
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
-                setTimeout(() => oscillator.stop(), 200);
-            }, 200);
+            // Envelope de amplitude mais suave
+            gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+            
+            setTimeout(() => oscillator.stop(), 200);
         }
         
         // Som de falha mais suave
@@ -369,9 +374,9 @@
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
-            oscillator.type = 'sine'; // Mudado de 'sawtooth' para 'sine' para um som mais suave
-            oscillator.frequency.value = 300; // Frequência mais baixa para som menos irritante
-            gainNode.gain.value = 0.2; // Volume reduzido
+            oscillator.type = 'sine'; 
+            oscillator.frequency.value = 220; // Frequência mais baixa
+            gainNode.gain.value = 0.15; // Volume reduzido
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
@@ -379,12 +384,14 @@
             oscillator.start();
             
             // Modulação de frequência mais suave
-            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+            oscillator.frequency.linearRampToValueAtTime(180, audioContext.currentTime + 0.2);
             
-            setTimeout(() => {
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
-                setTimeout(() => oscillator.stop(), 400);
-            }, 200);
+            // Envelope de amplitude mais suave
+            gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            
+            setTimeout(() => oscillator.stop(), 300);
         }
         
         // Som de celebração para conclusão de nível
@@ -401,18 +408,22 @@
                     
                     osc.type = 'sine';
                     osc.frequency.value = baseFreq * interval;
-                    gain.gain.value = 0.15; // Volume mais baixo para cada nota do acorde
+                    gain.gain.value = 0.1; // Volume mais baixo para cada nota do acorde
                     
                     osc.connect(gain);
                     gain.connect(audioContext.destination);
                     
-                    osc.start(audioContext.currentTime + time);
+                    // Envelopes mais suaves
+                    gain.gain.setValueAtTime(0, audioContext.currentTime + time);
+                    gain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + time + 0.05);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + time + duration);
+                    
+                    osc.start(audioContext.currentTime + time);
                     osc.stop(audioContext.currentTime + time + duration);
                 });
             };
             
-            // Tocar uma sequência de acordes rápidos ascendentes
+            // Tocar uma sequência de acordes ascendentes com volumes mais baixos e mais suaves
             playChord(440, 0, 0.3);    // Lá
             playChord(523.25, 0.25, 0.3); // Dó
             playChord(659.25, 0.5, 0.6);  // Mi (mais longo)
@@ -584,10 +595,11 @@
                 circleData.countdownElement.style.top = (circleData.position.y - newSize / 2) + 'px';
                 
                 // Tocar o som de batida a cada porcentagem do tempo (ajustada pelo nível)
-                const knockInterval = circleData.duration <= 1000 ? 250 : 
-                                     (circleData.duration <= 1500 ? 300 : 
-                                     (circleData.duration <= 2000 ? 350 : 
-                                     (circleData.duration <= 3000 ? 400 : 500)));
+                // Aumentei o intervalo para tocar o som com menos frequência
+                const knockInterval = circleData.duration <= 1000 ? 400 : 
+                                     (circleData.duration <= 1500 ? 450 : 
+                                     (circleData.duration <= 2000 ? 500 : 
+                                     (circleData.duration <= 3000 ? 600 : 700)));
                                     
                 if (Math.floor(elapsed / knockInterval) !== Math.floor((elapsed - 16) / knockInterval)) {
                     createKnockSound();
