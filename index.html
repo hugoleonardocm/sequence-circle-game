@@ -73,6 +73,7 @@
             border: 2px solid rgba(76, 175, 80, 0.7);
             z-index: 10;
             pointer-events: none; /* Desativa cliques no círculo menor */
+            transition: opacity 0.3s, transform 0.3s;
         }
         
         .countdown-circle {
@@ -82,6 +83,7 @@
             background-color: transparent;
             z-index: 5;
             cursor: pointer; /* Torna o círculo maior clicável */
+            transition: opacity 0.3s, transform 0.3s;
         }
         
         /* Destacar o próximo círculo que deve ser clicado */
@@ -628,7 +630,7 @@
         }
         
         // Mostrar indicador de resultado (perfect, good, miss)
-        function showResultIndicator(x, y, result) {
+        function showResultIndicator(x, y, result) {, 
             const indicator = document.createElement('div');
             indicator.className = `result-indicator ${result}`;
             
@@ -721,19 +723,17 @@
                 // Mostrar indicador de resultado
                 showResultIndicator(circleData.position.x, circleData.position.y, result);
                 
-                // Remover elementos visuais
-                circleData.countdownElement.remove();
+                // Remover elementos visuais com animação
+                circleData.countdownElement.style.opacity = '0';
+                circleData.countdownElement.style.transform = 'scale(0.5)';
+                circleData.element.style.opacity = '0';
+                circleData.element.style.transform = 'scale(0.5)';
                 
-                if (result === 'perfect') {
-                    circleData.element.style.borderColor = 'gold';
-                    circleData.element.style.color = 'gold';
-                } else if (result === 'good') {
-                    circleData.element.style.borderColor = '#8fe88f';
-                    circleData.element.style.borderWidth = '3px';
-                } else {
-                    circleData.element.style.opacity = '0.4';
-                    circleData.element.style.borderColor = '#ff6b6b';
-                }
+                // Remover elementos do DOM após a animação
+                setTimeout(() => {
+                    circleData.countdownElement.remove();
+                    circleData.element.remove();
+                }, 300);
                 
                 // Remover dos círculos ativos
                 delete activeCircles[clickedNumber];
