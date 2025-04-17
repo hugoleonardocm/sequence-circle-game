@@ -1,0 +1,296 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #222;
+    color: #fff;
+    padding: 10px;
+    overflow-x: hidden;
+}
+
+h1 {
+    margin: 10px 0;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    text-align: center;
+}
+
+.controls {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+select, button {
+    padding: 8px 12px;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    border-radius: 5px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: #fff;
+}
+
+button {
+    background-color: #2a6e2d;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 8px 16px;
+}
+
+button:hover {
+    background-color: #3a8e3d;
+}
+
+button:disabled {
+    background-color: #444;
+    cursor: not-allowed;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    aspect-ratio: 4/3;
+    border: 2px solid #444;
+    background-color: #000;
+    overflow: hidden;
+    margin: 0 auto;
+    touch-action: none; /* Previne comportamentos de toque padrão */
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #8fe88f;
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid rgba(76, 175, 80, 0.7);
+    z-index: 10;
+    pointer-events: none; /* Desativa cliques no círculo menor */
+    transition: opacity 0.3s, transform 0.3s;
+    font-size: clamp(0.8rem, 3vw, 1.2rem);
+}
+
+.countdown-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(76, 175, 80, 0.6);
+    background-color: transparent;
+    z-index: 5;
+    cursor: pointer; /* Torna o círculo maior clicável */
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+/* Destacar o próximo círculo que deve ser clicado */
+.countdown-circle.next {
+    border: 2px solid rgba(255, 255, 100, 0.8);
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+    z-index: 6; /* Prioridade mais alta para o próximo círculo */
+}
+
+/* Desativar círculos que não devem ser clicados ainda */
+.countdown-circle.inactive {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.result-indicator {
+    position: absolute;
+    font-weight: bold;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.5s;
+}
+
+.perfect {
+    color: gold;
+}
+
+.good {
+    color: #8fe88f;
+}
+
+.miss {
+    color: #ff6b6b;
+}
+
+.line {
+    position: absolute;
+    background-color: rgba(76, 175, 80, 0.4);
+    z-index: 1;
+    transform-origin: 0 0;
+}
+
+.score-info {
+    margin-top: 15px;
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    color: #fff;
+    text-align: center;
+}
+
+.instruction {
+    margin: 10px 0;
+    font-style: italic;
+    color: #aaa;
+    max-width: 800px;
+    text-align: center;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    padding: 0 10px;
+}
+
+.game-over, .success-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    text-align: center;
+    padding: 20px;
+}
+
+.game-over span {
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    margin-top: 20px;
+}
+
+.game-over button, .success-overlay button {
+    margin-top: 20px;
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    padding: 10px 20px;
+}
+
+/* Estilo para o overlay de sucesso */
+.success-overlay {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.success-overlay .title {
+    color: gold;
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.success-overlay .message {
+    color: #8fe88f;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    margin: 5px 0;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 768px) {
+    #game-container {
+        aspect-ratio: 3/4; /* Formato mais alto que largo para mobile */
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    select, button {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+    
+    #game-container {
+        border-width: 1px;
+    }
+    
+    .circle, .countdown-circle {
+        border-width: 1px;
+    }
+}
+
+/* Melhorias para desktop */
+@media (min-width: 1200px) {
+    #game-container {
+        aspect-ratio: 4/3;
+        max-height: 70vh;
+    }
+}
+
+/* Modo paisagem em dispositivos móveis */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 5px;
+    }
+    
+    h1 {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .controls-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 20%;
+        margin-right: 10px;
+    }
+    
+    #game-container {
+        width: 75%;
+        aspect-ratio: 5/3;
+        margin: 0;
+    }
+    
+    .score-info, .instruction {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Prevenção de scroll e zoom em dispositivos móveis */
+@media (hover: none) and (pointer: coarse) {
+    body {
+        touch-action: pan-x pan-y;
+        height: 100%;
+        position: fixed;
+        overflow: hidden;
+        width: 100%;
+    }
+}
