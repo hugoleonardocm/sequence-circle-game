@@ -65,7 +65,7 @@ button:disabled {
 #game-container {
     position: relative;
     width: 100%;
-    max-width: 1200px;
+    max-width: 970px;
     aspect-ratio: 4/3;
     border: 2px solid #444;
     background-color: #000;
@@ -243,7 +243,7 @@ button:disabled {
 }
 
 /* Melhorias para desktop */
-@media (min-width: 1200px) {
+@media (min-width: 970) {
     #game-container {
         aspect-ratio: 4/3;
         max-height: 70vh;
