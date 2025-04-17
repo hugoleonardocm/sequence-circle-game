@@ -308,10 +308,14 @@ function spawnCircle() {
     
     gameContainer.appendChild(countdownCircle);
     
+    // Tempo adicional para o primeiro círculo (2 segundos extras)
+    // Adicionamos 2000ms (2 segundos) ao tempo do primeiro círculo
+    const timeToClick = currentNumber === 1 ? currentLevel.timeToClick + 2000 : currentLevel.timeToClick;
+    
     // Registrar círculo ativo
     activeCircles[currentNumber] = {
         startTime: Date.now(),
-        duration: currentLevel.timeToClick,
+        duration: timeToClick, // Agora usando o tempo ajustado
         element: circle,
         countdownElement: countdownCircle,
         position: { x, y },
@@ -360,7 +364,7 @@ function spawnCircle() {
             if (gameRunning) {
                 endGame(true);
             }
-        }, currentLevel.timeToClick + 1000);
+        }, timeToClick + 1000); // Usar o tempo ajustado para o último círculo também
     }
 }
 
