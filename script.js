@@ -47,6 +47,8 @@ let spawnTimer = null;
 let isMobile = window.matchMedia("(max-width: 768px)").matches;
 // Mapear linhas para círculos
 let circleLines = {};
+// Variável para controlar se o primeiro círculo já apareceu
+let firstCircleSpawned = false;
 
 // Referências aos elementos do DOM
 const gameContainer = document.getElementById('game-container');
@@ -217,6 +219,7 @@ function startGame() {
     
     // Redefinir o número para o próximo clique
     nextClickNumber = 1;
+    firstCircleSpawned = false;
     
     // Iniciar o spawn de círculos
     spawnCircle();
@@ -234,6 +237,7 @@ function resetGame() {
     lastCirclePos = null;
     activeCircles = {};
     circleLines = {}; // Resetar o mapeamento de linhas
+    firstCircleSpawned = false;
     
     // Limpar todos os timers
     countdownTimers.forEach(timer => clearTimeout(timer));
@@ -315,7 +319,7 @@ function spawnCircle() {
     // Registrar círculo ativo
     activeCircles[currentNumber] = {
         startTime: Date.now(),
-        duration: timeToClick, // Agora usando o tempo ajustado
+        duration: timeToClick, // Usando o tempo ajustado
         element: circle,
         countdownElement: countdownCircle,
         position: { x, y },
@@ -357,14 +361,23 @@ function spawnCircle() {
     
     // Agendar o próximo círculo se não for o último
     if (currentNumber < currentLevel.circleCount) {
+        // Se for o primeiro círculo, esperamos o tempo normal de spawn
+        // A temporização do primeiro círculo só afeta o tempo para clicar,
+        // não o tempo para o próximo círculo aparecer
         spawnTimer = setTimeout(spawnCircle, currentLevel.spawnDelay);
     } else {
         // Todos os círculos foram gerados, aguardar finalização
+        const lastCircleTime = activeCircles[currentNumber].duration;
         spawnTimer = setTimeout(() => {
             if (gameRunning) {
                 endGame(true);
             }
-        }, timeToClick + 1000); // Usar o tempo ajustado para o último círculo também
+        }, lastCircleTime + 1000); // Usar o tempo do último círculo
+    }
+    
+    // Marcar que o primeiro círculo já foi criado
+    if (currentNumber === 1) {
+        firstCircleSpawned = true;
     }
 }
 
