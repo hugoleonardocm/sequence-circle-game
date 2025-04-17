@@ -312,7 +312,7 @@ function spawnCircle() {
     
     gameContainer.appendChild(countdownCircle);
 
-    const startDelay = 1000; // Atraso inicial para o primeiro círculo
+    const startDelay = 500; // Atraso inicial para o primeiro círculo
     const timeToClick = currentNumber === 1 ? currentLevel.timeToClick + startDelay : currentLevel.timeToClick;
     
     // Registrar círculo ativo
