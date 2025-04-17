@@ -45,6 +45,8 @@ let countdownTimers = [];
 let activeCircles = {};
 let spawnTimer = null;
 let isMobile = window.matchMedia("(max-width: 768px)").matches;
+// Mapear linhas para círculos
+let circleLines = {};
 
 // Referências aos elementos do DOM
 const gameContainer = document.getElementById('game-container');
@@ -231,6 +233,7 @@ function resetGame() {
     scoreElement.textContent = score;
     lastCirclePos = null;
     activeCircles = {};
+    circleLines = {}; // Resetar o mapeamento de linhas
     
     // Limpar todos os timers
     countdownTimers.forEach(timer => clearTimeout(timer));
@@ -317,9 +320,26 @@ function spawnCircle() {
         size: circleSize
     };
     
-    // Desenhar linha
+    // Inicializar o array de linhas para este círculo se não existir
+    if (!circleLines[currentNumber]) {
+        circleLines[currentNumber] = [];
+    }
+    
+    // Desenhar linha conectando com o círculo anterior
     if (lastCirclePos) {
-        drawLine(lastCirclePos.x, lastCirclePos.y, x, y);
+        const lineElement = drawLine(lastCirclePos.x, lastCirclePos.y, x, y);
+        
+        // Armazenar a linha para referência futura
+        // Cada linha é conectada ao círculo atual e ao anterior
+        const previousCircleNumber = currentNumber - 1;
+        
+        // Associar a linha aos círculos que ela conecta
+        if (!circleLines[previousCircleNumber]) {
+            circleLines[previousCircleNumber] = [];
+        }
+        
+        circleLines[previousCircleNumber].push(lineElement);
+        circleLines[currentNumber].push(lineElement);
     }
     
     // Salvar posição atual para a próxima linha
@@ -451,6 +471,31 @@ function drawLine(x1, y1, x2, y2) {
     
     gameContainer.appendChild(line);
     lineElements.push(line);
+    
+    return line; // Retornar a referência da linha para uso no mapeamento
+}
+
+// Função para remover linhas ligadas a um círculo
+function removeConnectedLines(circleNumber) {
+    // Verificar se há linhas associadas a este círculo
+    if (circleLines[circleNumber] && circleLines[circleNumber].length > 0) {
+        // Remover cada linha associada
+        circleLines[circleNumber].forEach(line => {
+            // Adicionar classe para animação de desaparecimento
+            line.style.opacity = '0';
+            line.style.transform += ' scale(0.5)';
+            
+            // Remover do DOM após a animação
+            setTimeout(() => {
+                if (line && line.parentNode) {
+                    line.remove();
+                }
+            }, 300);
+        });
+        
+        // Remover referências das linhas para este círculo
+        circleLines[circleNumber] = [];
+    }
 }
 
 // Tratamento do clique no círculo
@@ -465,6 +510,9 @@ function handleCircleClick(event) {
     if (activeCircles[clickedNumber] && !activeCircles[clickedNumber].clicked && clickedNumber === nextClickNumber) {
         const circleData = activeCircles[clickedNumber];
         circleData.clicked = true;
+        
+        // Remover as linhas conectadas a este círculo
+        removeConnectedLines(clickedNumber);
         
         // Calcular a precisão do clique
         const progress = circleData.progress;
