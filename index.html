@@ -5,29 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Círculos Sequenciais</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Arial', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: flex-start;
+            min-height: 100vh;
             margin: 0;
             background-color: #222;
             color: #fff;
-            overflow: hidden;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            margin: 10px 0;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            text-align: center;
         }
         
         .controls {
-            margin-bottom: 20px;
+            margin: 15px 0;
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 500px;
         }
         
         select, button {
             padding: 8px 12px;
-            font-size: 16px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
             border-radius: 5px;
             border: 1px solid #444;
             background-color: #333;
@@ -40,6 +57,7 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
+            padding: 8px 16px;
         }
         
         button:hover {
@@ -53,11 +71,14 @@
         
         #game-container {
             position: relative;
-            width: 1200px;
-            height: 900px;
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 4/3;
             border: 2px solid #444;
             background-color: #000;
             overflow: hidden;
+            margin: 0 auto;
+            touch-action: none; /* Previne comportamentos de toque padrão */
         }
         
         .circle {
@@ -74,6 +95,7 @@
             z-index: 10;
             pointer-events: none; /* Desativa cliques no círculo menor */
             transition: opacity 0.3s, transform 0.3s;
+            font-size: clamp(0.8rem, 3vw, 1.2rem);
         }
         
         .countdown-circle {
@@ -102,7 +124,7 @@
         .result-indicator {
             position: absolute;
             font-weight: bold;
-            font-size: 24px;
+            font-size: clamp(1rem, 3vw, 1.5rem);
             z-index: 15;
             opacity: 0;
             transition: opacity 0.3s, transform 0.5s;
@@ -128,20 +150,23 @@
         }
         
         .score-info {
-            margin-top: 20px;
-            font-size: 18px;
+            margin-top: 15px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             color: #fff;
+            text-align: center;
         }
         
         .instruction {
-            margin-top: 10px;
+            margin: 10px 0;
             font-style: italic;
             color: #aaa;
             max-width: 800px;
             text-align: center;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            padding: 0 10px;
         }
         
-        .game-over {
+        .game-over, .success-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -154,37 +179,24 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
-            font-size: 32px;
+            font-size: clamp(1.5rem, 5vw, 2rem);
             text-align: center;
+            padding: 20px;
         }
         
         .game-over span {
-            font-size: 24px;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
             margin-top: 20px;
         }
         
-        .game-over button {
+        .game-over button, .success-overlay button {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             padding: 10px 20px;
         }
         
         /* Estilo para o overlay de sucesso */
         .success-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            font-size: 32px;
-            text-align: center;
             animation: fadeIn 0.5s ease-in-out;
         }
         
@@ -195,45 +207,120 @@
         
         .success-overlay .title {
             color: gold;
-            font-size: 40px;
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
             margin-bottom: 10px;
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
         
         .success-overlay .message {
             color: #8fe88f;
-            font-size: 24px;
-            margin: 10px 0;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin: 5px 0;
         }
         
-        .success-overlay button {
-            margin-top: 20px;
-            font-size: 18px;
-            padding: 10px 20px;
-            background-color: #2a6e2d;
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            #game-container {
+                aspect-ratio: 3/4; /* Formato mais alto que largo para mobile */
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            select, button {
+                width: 100%;
+                max-width: 300px;
+            }
         }
         
-        .success-overlay button:hover {
-            background-color: #3a8e3d;
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            #game-container {
+                border-width: 1px;
+            }
+            
+            .circle, .countdown-circle {
+                border-width: 1px;
+            }
+        }
+        
+        /* Melhorias para desktop */
+        @media (min-width: 1200px) {
+            #game-container {
+                aspect-ratio: 4/3;
+                max-height: 70vh;
+            }
+        }
+        
+        /* Modo paisagem em dispositivos móveis */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: flex-start;
+                padding: 5px;
+            }
+            
+            h1 {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .controls-wrapper {
+                display: flex;
+                flex-direction: column;
+                width: 20%;
+                margin-right: 10px;
+            }
+            
+            #game-container {
+                width: 75%;
+                aspect-ratio: 5/3;
+                margin: 0;
+            }
+            
+            .score-info, .instruction {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        /* Prevenção de scroll e zoom em dispositivos móveis */
+        @media (hover: none) and (pointer: coarse) {
+            body {
+                touch-action: pan-x pan-y;
+                height: 100%;
+                position: fixed;
+                overflow: hidden;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Training room</h1>
     
-    <div class="controls">
-        <select id="level-select">
-            <option value="easy">Fácil</option>
-            <option value="medium">Médio</option>
-            <option value="hard">Difícil</option>
-            <option value="expert">Especialista</option>
-            <option value="insane">Insano</option>
-        </select>
-        <button id="start-button">Iniciar</button>
-    </div>
-    
     <div class="instruction">
         Clique no círculo destacado quando ele se alinhar com o círculo interno! Você deve clicar nos círculos em ordem numérica.
+    </div>
+    
+    <div class="controls-wrapper">
+        <div class="controls">
+            <select id="level-select">
+                <option value="easy">Fácil</option>
+                <option value="medium">Médio</option>
+                <option value="hard">Difícil</option>
+                <option value="expert">Especialista</option>
+                <option value="insane">Insano</option>
+            </select>
+            <button id="start-button">Iniciar</button>
+        </div>
     </div>
     
     <div id="game-container"></div>
@@ -249,35 +336,30 @@
                 circleCount: 10,
                 spawnDelay: 1000,
                 timeToClick: 2000,
-                circleSize: 90,
                 hitZoneTolerance: 0.30
             },
             medium: {
                 circleCount: 15,
                 spawnDelay: 750,
                 timeToClick: 1500,
-                circleSize: 90,
                 hitZoneTolerance: 0.25
             },
             hard: {
                 circleCount: 20,
                 spawnDelay: 600,
                 timeToClick: 1200,
-                circleSize: 90,
                 hitZoneTolerance: 0.20
             },
             expert: {
                 circleCount: 25,
                 spawnDelay: 500,
                 timeToClick: 1000,
-                circleSize: 90,
                 hitZoneTolerance: 0.15
             },
             insane: {
                 circleCount: 30,
                 spawnDelay: 300,
                 timeToClick: 600,
-                circleSize: 90,
                 hitZoneTolerance: 0.10
             }
         };
@@ -286,7 +368,7 @@
         let gameRunning = false;
         let currentLevel;
         let currentNumber = 0;
-        let nextClickNumber = 1; // Novo: rastreia qual número deve ser clicado em seguida
+        let nextClickNumber = 1;
         let score = 0;
         let lastCirclePos = null;
         let circleElements = [];
@@ -294,6 +376,7 @@
         let countdownTimers = [];
         let activeCircles = {};
         let spawnTimer = null;
+        let isMobile = window.matchMedia("(max-width: 768px)").matches;
         
         // Referências aos elementos do DOM
         const gameContainer = document.getElementById('game-container');
@@ -303,9 +386,19 @@
         
         // Carregar sons usando o Web Audio API para melhor compatibilidade
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let tickBuffer = null;
-        let successBuffer = null;
-        let failBuffer = null;
+        
+        // Função para calcular tamanho dos círculos com base no contêiner
+        function calculateCircleSize() {
+            const containerWidth = gameContainer.offsetWidth;
+            const containerHeight = gameContainer.offsetHeight;
+            const smallerDimension = Math.min(containerWidth, containerHeight);
+            
+            // Tamanho base para cada nível, agora como porcentagem do contêiner
+            const baseSize = smallerDimension * (isMobile ? 0.12 : 0.075);
+            
+            // Retorna o tamanho calculado
+            return baseSize;
+        }
         
         // Função para tocar som
         function playSound(buffer) {
@@ -319,46 +412,43 @@
         
         // Criar som de batida de porta (toc toc) - SUAVIZADO
         function createKnockSound() {
-            if (!audioContext) return;
-            
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            // Usar um som mais suave, com frequência mais alta e volume mais baixo
-            oscillator.type = 'sine'; // Onda senoidal é mais suave que outras ondas
-            oscillator.frequency.value = 180; // Frequência mais aguda, menos "batida"
-            gainNode.gain.value = 0.15; // Volume bem reduzido
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start();
-            
-            // Envelope de amplitude mais suave, sem ataque pronunciado
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02); // Rampa gradual para subir
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1); // Decaimento mais rápido
-            
-            setTimeout(() => oscillator.stop(), 100); // Som mais curto
-        }
-        
-        // Som de sucesso suavizado
-        function createSuccessSound() {
-            if (!audioContext) return;
+            if (!audioContext || !gameRunning) return;
             
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
             oscillator.type = 'sine';
-            oscillator.frequency.value = 120; // Frequência mais agradável (Lá)
-            gainNode.gain.value = 0.15; // Volume reduzido
+            oscillator.frequency.value = 180;
+            gainNode.gain.value = 0.15;
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
             oscillator.start();
             
-            // Envelope de amplitude mais suave
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.02);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            
+            setTimeout(() => oscillator.stop(), 100);
+        }
+        
+        // Som de sucesso suavizado
+        function createSuccessSound() {
+            if (!audioContext || !gameRunning) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 120;
+            gainNode.gain.value = 0.15;
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            
             gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
@@ -368,24 +458,22 @@
         
         // Som de falha mais suave
         function createFailSound() {
-            if (!audioContext) return;
+            if (!audioContext || !gameRunning) return;
             
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
             oscillator.type = 'sine'; 
-            oscillator.frequency.value = 220; // Frequência mais baixa
-            gainNode.gain.value = 0.15; // Volume reduzido
+            oscillator.frequency.value = 220;
+            gainNode.gain.value = 0.15;
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
             oscillator.start();
             
-            // Modulação de frequência mais suave
             oscillator.frequency.linearRampToValueAtTime(180, audioContext.currentTime + 0.2);
             
-            // Envelope de amplitude mais suave
             gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
@@ -395,11 +483,10 @@
         
         // Som de celebração para conclusão de nível
         function createCelebrationSound() {
-            if (!audioContext) return;
+            if (!audioContext || !gameRunning) return;
             
-            // Primeiro acorde
             const playChord = (baseFreq, time, duration) => {
-                const notes = [1, 1.25, 1.5]; // Intervalos para formar um acorde maior
+                const notes = [1, 1.25, 1.5];
                 
                 notes.forEach(interval => {
                     const osc = audioContext.createOscillator();
@@ -407,12 +494,11 @@
                     
                     osc.type = 'sine';
                     osc.frequency.value = baseFreq * interval;
-                    gain.gain.value = 0.1; // Volume mais baixo para cada nota do acorde
+                    gain.gain.value = 0.1;
                     
                     osc.connect(gain);
                     gain.connect(audioContext.destination);
                     
-                    // Envelopes mais suaves
                     gain.gain.setValueAtTime(0, audioContext.currentTime + time);
                     gain.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + time + 0.05);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + time + duration);
@@ -422,10 +508,24 @@
                 });
             };
             
-            // Tocar uma sequência de acordes ascendentes com volumes mais baixos e mais suaves
-            playChord(440, 0, 0.3);    // Lá
-            playChord(523.25, 0.25, 0.3); // Dó
-            playChord(659.25, 0.5, 0.6);  // Mi (mais longo)
+            playChord(440, 0, 0.3);
+            playChord(523.25, 0.25, 0.3);
+            playChord(659.25, 0.5, 0.6);
+        }
+        
+        // Prevenir comportamentos padrão de toque em dispositivos móveis
+        function preventDefaultTouchBehavior() {
+            document.addEventListener('touchmove', function(e) {
+                if (gameRunning) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            document.addEventListener('touchstart', function(e) {
+                if (gameRunning && e.target.closest('#game-container')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         }
         
         // Iniciar o jogo
@@ -492,20 +592,23 @@
         function spawnCircle() {
             if (!gameRunning) return;
             
+            // Calcular tamanho do círculo com base no tamanho do contêiner
+            const circleSize = calculateCircleSize();
+            
             currentNumber++;
             
             // Posição aleatória (com margem para o círculo caber na tela)
-            const margin = currentLevel.circleSize;
+            const margin = circleSize;
             const x = margin + Math.random() * (gameContainer.offsetWidth - 2 * margin);
             const y = margin + Math.random() * (gameContainer.offsetHeight - 2 * margin);
             
             // Criar círculo principal
             const circle = document.createElement('div');
             circle.className = 'circle';
-            circle.style.width = currentLevel.circleSize + 'px';
-            circle.style.height = currentLevel.circleSize + 'px';
-            circle.style.left = (x - currentLevel.circleSize / 2) + 'px';
-            circle.style.top = (y - currentLevel.circleSize / 2) + 'px';
+            circle.style.width = circleSize + 'px';
+            circle.style.height = circleSize + 'px';
+            circle.style.left = (x - circleSize / 2) + 'px';
+            circle.style.top = (y - circleSize / 2) + 'px';
             circle.textContent = currentNumber;
             circle.dataset.number = currentNumber;
             gameContainer.appendChild(circle);
@@ -521,13 +624,17 @@
                 countdownCircle.classList.add('next');
             }
             
-            const countdownSize = currentLevel.circleSize * 2.5;
+            const countdownSize = circleSize * 2.5;
             countdownCircle.style.width = countdownSize + 'px';
             countdownCircle.style.height = countdownSize + 'px';
             countdownCircle.style.left = (x - countdownSize / 2) + 'px';
             countdownCircle.style.top = (y - countdownSize / 2) + 'px';
             countdownCircle.dataset.number = currentNumber;
+            
+            // Adicionar eventos para desktop e mobile
             countdownCircle.addEventListener('click', handleCircleClick);
+            countdownCircle.addEventListener('touchstart', handleCircleClick, { passive: false });
+            
             gameContainer.appendChild(countdownCircle);
             
             // Registrar círculo ativo
@@ -538,7 +645,8 @@
                 countdownElement: countdownCircle,
                 position: { x, y },
                 progress: 0,
-                clicked: false
+                clicked: false,
+                size: circleSize
             };
             
             // Desenhar linha
@@ -581,8 +689,8 @@
             
             if (progress < 1 && !circleData.clicked) {
                 // Calcular novo tamanho do círculo de contagem
-                const startSize = currentLevel.circleSize * 2.5;
-                const targetSize = currentLevel.circleSize;
+                const startSize = circleData.size * 2.5;
+                const targetSize = circleData.size;
                 const newSize = startSize - (startSize - targetSize) * progress;
                 
                 // Atualizar tamanho do círculo de contagem
@@ -594,7 +702,6 @@
                 circleData.countdownElement.style.top = (circleData.position.y - newSize / 2) + 'px';
                 
                 // Tocar o som de batida a cada porcentagem do tempo (ajustada pelo nível)
-                // Aumentei o intervalo para tocar o som com menos frequência
                 const knockInterval = circleData.duration <= 1000 ? 400 : 
                                      (circleData.duration <= 1500 ? 450 : 
                                      (circleData.duration <= 2000 ? 500 : 
@@ -642,8 +749,10 @@
                 indicator.textContent = 'ERROU!';
             }
             
-            indicator.style.left = (x - 50) + 'px';
-            indicator.style.top = (y - 50) + 'px';
+            // Ajustar posição com base no tamanho da tela
+            const offset = isMobile ? 30 : 50;
+            indicator.style.left = (x - offset) + 'px';
+            indicator.style.top = (y - offset) + 'px';
             gameContainer.appendChild(indicator);
             
             // Animação de aparecimento
@@ -678,6 +787,10 @@
         
         // Tratamento do clique no círculo
         function handleCircleClick(event) {
+            // Evitar comportamento padrão para garantir funcionamento em touch devices
+            event.preventDefault();
+            event.stopPropagation();
+            
             const clickedNumber = parseInt(event.target.dataset.number);
             
             // Verificar se o círculo está ativo e é o próximo a ser clicado
@@ -726,8 +839,6 @@
                 // Remover elementos visuais com animação
                 circleData.countdownElement.style.opacity = '0';
                 circleData.countdownElement.style.transform = 'scale(0.5)';
-                circleData.element.style.opacity = '0';
-                circleData.element.style.transform = 'scale(0.5)';
                 
                 // Remover elementos do DOM após a animação
                 setTimeout(() => {
