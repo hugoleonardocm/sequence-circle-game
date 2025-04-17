@@ -64,7 +64,7 @@ function calculateCircleSize() {
     const smallerDimension = Math.min(containerWidth, containerHeight);
     
     // Tamanho base para cada nível, agora como porcentagem do contêiner
-    const baseSize = smallerDimension * (isMobile ? 0.80 : 0.25);
+    const baseSize = smallerDimension * (isMobile ? 0.30 : 0.15);
     
     // Retorna o tamanho calculado
     return baseSize;
