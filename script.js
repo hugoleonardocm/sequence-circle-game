@@ -311,9 +311,9 @@ function spawnCircle() {
     countdownCircle.addEventListener('touchstart', handleCircleClick, { passive: false });
     
     gameContainer.appendChild(countdownCircle);
-    
-    // Tempo adicional para o primeiro círculo (2 segundos extras)
-    const timeToClick = currentNumber === 1 ? currentLevel.timeToClick + 2000 : currentLevel.timeToClick;
+
+    const startDelay = 1000; // Atraso inicial para o primeiro círculo
+    const timeToClick = currentNumber === 1 ? currentLevel.timeToClick + startDelay : currentLevel.timeToClick;
     
     // Registrar círculo ativo
     activeCircles[currentNumber] = {
@@ -364,9 +364,8 @@ function spawnCircle() {
         // Isso dará ao jogador tempo suficiente para clicar no primeiro antes que o segundo apareça
         let nextSpawnDelay = currentLevel.spawnDelay;
         
-        // Adicionar o mesmo tempo extra (2000ms) para o segundo círculo que foi adicionado ao primeiro
         if (currentNumber === 1) {
-            nextSpawnDelay += 2000; // Adicionar 2 segundos de atraso extra para o segundo círculo
+            nextSpawnDelay += startDelay;
         }
         
         spawnTimer = setTimeout(spawnCircle, nextSpawnDelay);
